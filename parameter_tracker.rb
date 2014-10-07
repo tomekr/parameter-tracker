@@ -28,13 +28,22 @@ class BurpExtender
     @mutex = Mutex.new()
 
     # main split pane
-    @splitpane = javax.swing.JSplitPane.new(0)
+    @mainpane = javax.swing.JSplitPane.new(1)
+    @rightpane = javax.swing.JSplitPane.new(0)
+
+    # Setup left pane
+    @tableModel = LogTableModel.new(self, @log)
+    logTable = Table.new(self, @tableModel)
+    scrollPane = javax.swing.JScrollPane.new(logTable)
+    @mainpane.setTopComponent(scrollPane)
+
+    # Setup Right Pane
 
     # table of log entries
     @tableModel = LogTableModel.new(self, @log)
     logTable = Table.new(self, @tableModel)
     scrollPane = javax.swing.JScrollPane.new(logTable)
-    @splitpane.setLeftComponent(scrollPane)
+    @rightpane.setLeftComponent(scrollPane)
 
     # tabs with request/response viewers
     tabs = javax.swing.JTabbedPane.new()
@@ -42,10 +51,13 @@ class BurpExtender
     @responseViewer = callbacks.createMessageEditor(self, false)
     tabs.addTab("Request", @requestViewer.getComponent())
     tabs.addTab("Response", @responseViewer.getComponent())
-    @splitpane.setRightComponent(tabs)
+    @rightpane.setRightComponent(tabs)
+
+
+    @mainpane.setBottomComponent(@rightpane)
 
     # customize our UI components
-    callbacks.customizeUiComponent(@splitpane)
+    callbacks.customizeUiComponent(@mainpane)
     callbacks.customizeUiComponent(logTable)
     callbacks.customizeUiComponent(scrollPane)
     callbacks.customizeUiComponent(tabs)
@@ -67,7 +79,7 @@ class BurpExtender
   end
 
   def getUiComponent()
-    return @splitpane
+    return @mainpane
   end
 
   #
